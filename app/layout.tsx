@@ -14,8 +14,8 @@ const spaceGrotesk = Space_Grotesk({
 });
 
 export const metadata: Metadata = {
-  title: 'Helferlein - Nachbarschaftshilfe für Alltagsaufgaben',
-  description: 'Finde Helfer in deiner Nähe für kleine Alltagsaufgaben wie Rasenmähen, Einkaufen, Tiersitting und mehr. Die Community-Plattform für gegenseitige Nachbarschaftshilfe.',
+  title: 'Minicraft — Minecraft im Browser',
+  description: 'Ein von Grund auf nachgebautes Minecraft im Browser: unendliche Welten, Biome, Höhlen, Crafting, Mobs, Tag/Nacht-Zyklus. Ohne Original-Assets, komplett prozedural.',
   generator: 'v0.app',
   icons: {
     icon: [

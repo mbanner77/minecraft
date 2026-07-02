@@ -1,0 +1,326 @@
+/* Klassische Minecraft-UI: graue Panels, Slot-Vertiefungen, Bevel-Buttons */
+
+.mc-root {
+  font-family: var(--font-heading), 'Courier New', monospace;
+  image-rendering: pixelated;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.mc-root img {
+  image-rendering: pixelated;
+}
+
+/* Panel im Stil des Inventar-Fensters */
+.mc-panel {
+  background: #c6c6c6;
+  border: 3px solid;
+  border-color: #ffffff #555555 #555555 #ffffff;
+  border-radius: 2px;
+  box-shadow: 0 0 0 2px #000000, 0 8px 32px rgba(0, 0, 0, 0.6);
+  padding: 14px;
+  color: #3f3f3f;
+}
+
+.mc-panel h2 {
+  color: #3f3f3f;
+  font-size: 14px;
+  margin: 0 0 8px 2px;
+  font-weight: 700;
+}
+
+/* Item-Slot mit Vertiefung */
+.mc-slot {
+  width: 44px;
+  height: 44px;
+  background: #8b8b8b;
+  border: 2px solid;
+  border-color: #373737 #ffffff #ffffff #373737;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.mc-slot:hover {
+  background: #a5a5a5;
+}
+
+.mc-slot img {
+  width: 36px;
+  height: 36px;
+  pointer-events: none;
+}
+
+.mc-slot .mc-count {
+  position: absolute;
+  right: 2px;
+  bottom: 0;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 700;
+  text-shadow: 2px 2px 0 #3f3f3f;
+  pointer-events: none;
+  line-height: 1;
+}
+
+.mc-slot .mc-durability {
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  bottom: 3px;
+  height: 3px;
+  background: #202020;
+  pointer-events: none;
+}
+
+.mc-slot .mc-durability > div {
+  height: 100%;
+}
+
+/* Klassischer Button */
+.mc-btn {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  background: #6f6f6f;
+  background: linear-gradient(#828282, #6f6f6f);
+  border: 2px solid;
+  border-color: #aaaaaa #2f2f2f #2f2f2f #aaaaaa;
+  box-shadow: 0 0 0 2px #000;
+  color: #f0f0f0;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  text-shadow: 2px 2px 0 #383838;
+  cursor: pointer;
+  text-align: center;
+}
+
+.mc-btn:hover:not(:disabled) {
+  background: linear-gradient(#8f9dd8, #7a87c2);
+  border-color: #c0c8f0 #33395c #33395c #c0c8f0;
+  color: #ffffe0;
+}
+
+.mc-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+  color: #a0a0a0;
+}
+
+.mc-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.mc-input {
+  width: 100%;
+  padding: 10px 12px;
+  background: #000000;
+  border: 2px solid #a0a0a0;
+  color: #e0e0e0;
+  font-family: inherit;
+  font-size: 14px;
+  outline: none;
+}
+
+.mc-input:focus {
+  border-color: #ffffff;
+}
+
+.mc-label {
+  color: #e0e0e0;
+  font-size: 13px;
+  text-shadow: 1px 1px 0 #3f3f3f;
+  display: block;
+  margin-bottom: 4px;
+}
+
+/* Hotbar unten */
+.mc-hotbar {
+  display: flex;
+  background: rgba(0, 0, 0, 0.35);
+  border: 2px solid rgba(0, 0, 0, 0.55);
+  padding: 2px;
+  gap: 0;
+}
+
+.mc-hotbar .mc-hotslot {
+  width: 48px;
+  height: 48px;
+  border: 2px solid;
+  border-color: #262626 #6e6e6e #6e6e6e #262626;
+  background: rgba(60, 60, 60, 0.55);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mc-hotbar .mc-hotslot.selected {
+  border: 3px solid #ffffff;
+  box-shadow: 0 0 0 1px #000 inset, 0 0 0 1px #000;
+  margin: -1px;
+  z-index: 1;
+}
+
+.mc-hotbar .mc-hotslot img {
+  width: 36px;
+  height: 36px;
+  pointer-events: none;
+}
+
+.mc-hotbar .mc-count {
+  position: absolute;
+  right: 2px;
+  bottom: 0;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 700;
+  text-shadow: 2px 2px 0 #3f3f3f;
+  line-height: 1;
+}
+
+.mc-hotbar .mc-durability {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  bottom: 4px;
+  height: 3px;
+  background: #202020;
+}
+
+.mc-hotbar .mc-durability > div {
+  height: 100%;
+}
+
+/* Herz / Hunger / Luft-Symbole */
+.mc-stat-icon {
+  width: 18px;
+  height: 18px;
+  display: inline-block;
+  margin-right: 1px;
+  filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.7));
+}
+
+/* Fadenkreuz */
+.mc-crosshair {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  mix-blend-mode: difference;
+}
+
+/* Titel-Logo */
+.mc-title {
+  font-size: clamp(40px, 8vw, 84px);
+  font-weight: 900;
+  letter-spacing: 4px;
+  color: #e8e8e8;
+  text-shadow:
+    3px 3px 0 #3d3d3d,
+    6px 6px 0 rgba(0, 0, 0, 0.45);
+  -webkit-text-stroke: 2px #1a1a1a;
+}
+
+.mc-subtitle {
+  color: #ffff55;
+  text-shadow: 2px 2px 0 #3f3f00;
+  font-size: 16px;
+  font-weight: 700;
+  transform: rotate(-4deg);
+  animation: mc-pulse 0.9s ease-in-out infinite;
+}
+
+@keyframes mc-pulse {
+  0%, 100% { transform: rotate(-4deg) scale(1); }
+  50% { transform: rotate(-4deg) scale(1.07); }
+}
+
+/* Tooltip */
+.mc-tooltip {
+  position: fixed;
+  pointer-events: none;
+  background: rgba(16, 0, 16, 0.94);
+  border: 2px solid #25015a;
+  outline: 1px solid #100010;
+  color: #ffffff;
+  font-size: 13px;
+  padding: 4px 8px;
+  z-index: 100;
+  white-space: nowrap;
+}
+
+/* Fortschrittsbalken (Ofen) */
+.mc-progress-arrow {
+  width: 48px;
+  height: 16px;
+  background: #8b8b8b;
+  position: relative;
+  border: 1px solid #555;
+}
+
+.mc-progress-arrow > div {
+  height: 100%;
+  background: #ffffff;
+}
+
+.mc-flame {
+  width: 20px;
+  height: 20px;
+  position: relative;
+  background: linear-gradient(#3a3a3a, #3a3a3a);
+}
+
+.mc-flame > div {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(#ffdd55, #ff7700);
+}
+
+/* Debug-Overlay (F3) */
+.mc-debug {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  font-size: 13px;
+  line-height: 1.45;
+  color: #e0e0e0;
+  text-shadow: 1px 1px 0 #000;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 6px 10px;
+  pointer-events: none;
+  white-space: pre;
+}
+
+/* Schaden-Vignette */
+@keyframes mc-hurt-flash {
+  0% { opacity: 0.55; }
+  100% { opacity: 0; }
+}
+
+.mc-hurt {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(200, 0, 0, 0.65) 100%);
+  pointer-events: none;
+  animation: mc-hurt-flash 0.5s ease-out forwards;
+}
+
+/* Unterwasser-Overlay */
+.mc-underwater {
+  position: absolute;
+  inset: 0;
+  background: rgba(20, 60, 160, 0.22);
+  pointer-events: none;
+}
+
+.mc-scrollbox {
+  scrollbar-width: thin;
+  scrollbar-color: #555 #8b8b8b;
+}
