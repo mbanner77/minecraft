@@ -483,11 +483,12 @@ const TILE_DRAWERS: Record<string, TileDrawFn> = {
   tnt_side: (t) => {
     noisyFill(t, [190, 64, 54], 0.08)
     for (let y = 6; y < 10; y++) for (let x = 0; x < TILE; x++) t.set(x, y, [230, 220, 190])
-    // "TNT"-Pixel
-    const glyph = ['X.X..X.X..X.X', 'XXX..XX...XXX']
-    for (let x = 2; x < 14; x++) {
-      t.set(x, 7, x % 4 === 1 ? [40, 40, 40] : ((x % 2 === 0) ? [40, 40, 40] : [230, 220, 190]))
-      void glyph
+    // angedeuteter "TNT"-Schriftzug
+    for (let x = 3; x < 13; x++) {
+      if (x % 2 === 1) {
+        t.set(x, 7, [40, 40, 40])
+        t.set(x, 8, [40, 40, 40])
+      }
     }
   },
   pumpkin_top: (t) => {

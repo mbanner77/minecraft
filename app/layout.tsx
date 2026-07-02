@@ -18,21 +18,7 @@ export const metadata: Metadata = {
   description: 'Ein von Grund auf nachgebautes Minecraft im Browser: unendliche Welten, Biome, Höhlen, Crafting, Mobs, Tag/Nacht-Zyklus. Ohne Original-Assets, komplett prozedural.',
   generator: 'v0.app',
   icons: {
-    icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
-    ],
-    apple: '/apple-icon.png',
+    icon: [{ url: '/icon.svg', type: 'image/svg+xml' }],
   },
 }
 

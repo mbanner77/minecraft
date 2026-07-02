@@ -1,35 +1,86 @@
-# minimini
+# Minicraft — Minecraft im Browser
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [v0](https://v0.app).
+Ein von Grund auf nachgebautes Minecraft, das komplett im Browser läuft. Keine Original-Assets:
+alle Texturen, Sounds und Modelle werden zur Laufzeit prozedural erzeugt.
 
-## Built with v0
+Gebaut mit [Next.js](https://nextjs.org), [three.js](https://threejs.org) und TypeScript.
 
-This repository is linked to a [v0](https://v0.app) project. You can continue developing by visiting the link below -- start new chats to make changes, and v0 will push commits directly to this repo. Every merge to `main` will automatically deploy.
+## Features
 
-[Continue working on v0 →](https://v0.app/chat/projects/prj_9iVx7eoWeO11NlEZRPL3Qq7O50EN)
+**Welt**
+- Unendliche, prozedural generierte Welt (Simplex-Noise, seed-basiert und deterministisch)
+- 8 Biome: Ebene, Wald, Birkenwald, Wüste, Berge, verschneite Ebene, Strand, Ozean
+- Höhlensysteme, Erze (Kohle, Eisen, Gold, Diamant), Grundgestein
+- Bäume, Blumen, Gras, Kakteen, Kürbisse, Melonen
+- Tag/Nacht-Zyklus (20 Minuten) mit Sonne, Mond, Sternen und Wolken
 
-## Getting Started
+**Technik**
+- Chunk-Meshing mit Face-Culling, Smooth Lighting und Ambient Occlusion
+- Minecraft-artiges Lichtsystem: Sonnen- und Blocklicht (0–15) als Flutfüllung,
+  inkrementell aktualisiert beim Bauen/Abbauen — Fackeln beleuchten Höhlen
+- Prozedural gezeichnete 16×16-Texturen in einem Atlas, prozedurale WebAudio-Sounds
+- AABB-Physik: Springen, Sprinten, Schleichen (Kantenschutz), Schwimmen, Fliegen (Kreativ)
+- Fallende Blöcke (Sand, Kies), Partikel-Effekte
 
-First, run the development server:
+**Gameplay**
+- Überlebens- und Kreativmodus
+- Abbauen mit Werkzeug-Geschwindigkeiten, Härte, Mindest-Werkzeugstufen und Haltbarkeit
+- Inventar mit Hotbar, 2×2-Crafting, Werkbank (3×3), Ofen mit Brennstoff und Schmelzen
+- Gesundheit, Hunger, Sättigung, Fallschaden, Ertrinken, Tod & Respawn
+- Mobs: Schweine und Schafe (Tag), Zombies und Creeper (Nacht) — Creeper explodieren!
+- TNT mit Zündung und Kettenreaktion
+- Item-Drops als aufsammelbare Entities mit Magnet-Effekt
+- Mehrere Welten, gespeichert im Browser (localStorage, RLE-komprimierte Chunks)
+
+## Steuerung
+
+| Taste | Aktion |
+| --- | --- |
+| WASD | Bewegen |
+| Maus | Umsehen |
+| Leertaste | Springen (2× im Kreativ: Fliegen) |
+| Shift | Schleichen / Sinken beim Fliegen |
+| Strg oder 2× W | Sprinten |
+| Linksklick | Abbauen / Angreifen |
+| Rechtsklick | Platzieren / Benutzen / Essen |
+| Mittelklick | Block auswählen |
+| E | Inventar |
+| Q | Item wegwerfen |
+| 1–9 / Mausrad | Hotbar |
+| F3 | Debug-Overlay |
+| Esc | Pause-Menü |
+
+## Entwicklung
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
+pnpm install
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Dann [http://localhost:3000](http://localhost:3000) öffnen.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+pnpm build && pnpm start   # Produktions-Build
+```
 
-## Learn More
+## Projektstruktur
 
-To learn more, take a look at the following resources:
+```
+lib/minecraft/       Engine (kein React):
+  engine.ts          Haupt-Loop, Input, Interaktion, Rendering-Orchestrierung
+  world.ts           Chunk-Verwaltung + Lichtsystem (Flutfüllung)
+  worldgen.ts        Biome, Terrain, Höhlen, Erze, Vegetation
+  mesher.ts          Chunk-Geometrie mit AO + Smooth Lighting
+  textures.ts        prozeduraler Textur-Atlas (16×16-Tiles)
+  physics.ts         AABB-Kollision gegen die Voxel-Welt
+  mobs.ts            Mob-Modelle, KI und Physik
+  crafting.ts        Rezepte (geformt/formlos) + Schmelzen
+  ...
+components/minecraft/  React-UI: HUD, Inventar, Menüs, Debug-Overlay
+app/page.tsx           Einstiegspunkt (Client-only)
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-- [v0 Documentation](https://v0.app/docs) - learn about v0 and how to use it.
+---
 
-<a href="https://v0.app/chat/api/kiro/clone/mbanner77/minimini" alt="Open in Kiro"><img src="https://pdgvvgmkdvyeydso.public.blob.vercel-storage.com/open%20in%20kiro.svg?sanitize=true" /></a>
+Dieses Repository ist mit einem [v0](https://v0.app)-Projekt verknüpft:
+[Weiter bei v0 →](https://v0.app/chat/projects/prj_9iVx7eoWeO11NlEZRPL3Qq7O50EN)

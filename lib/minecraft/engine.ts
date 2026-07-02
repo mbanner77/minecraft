@@ -869,8 +869,7 @@ export class GameEngine {
       }
       return
     }
-
-    // TNT zünden statt abbauen, wenn leere Hand? Nein: Abbau startet im Update-Loop.
+    // Kein Mob getroffen: der Blockabbau startet im Update-Loop (updateBreaking)
   }
 
   // Rechtsklick: platzieren, benutzen, essen

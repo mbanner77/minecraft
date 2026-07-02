@@ -122,16 +122,12 @@ export function buildChunkGeometry(
             const nDef = getBlock(nId)
             if (nDef) {
               if (isWater) {
-                // Wasser: nur Flächen gegen Nicht-Wasser und Nicht-Opaque zeigen
-                if (nDef.liquid) continue
-                if (nDef.opaque && dy !== 1) continue
-                if (nDef.opaque && dy === 1) continue
+                // Wasser: nur Flächen gegen Luft und transparente Nicht-Flüssigkeiten zeigen
+                if (nDef.liquid || nDef.opaque) continue
               } else if (nDef.opaque) {
                 continue
               } else if (nDef.transparent && nId === id) {
                 continue // Glas an Glas, Blätter an Blätter: Innenflächen weglassen
-              } else if (nDef.liquid && def.transparent && dy !== 1) {
-                // Eis unter Wasser etc. — Fläche zeigen
               }
             }
           }
@@ -151,8 +147,9 @@ export function buildChunkGeometry(
           for (const corner of face.corners) {
             const [cx, cy, cz] = corner
             if (isWater || def.transparent || !def.opaque) {
-              // Keine AO/Smooth-Berechnung für Wasser & transparente Blöcke
-              vertLight.push(lightAt(dy === 0 ? nx : wx + (dx || 0), ny, dy === 0 ? nz : wz + (dz || 0)))
+              // Keine AO/Smooth-Berechnung für Wasser & transparente Blöcke:
+              // Licht der Zelle vor der Fläche verwenden
+              vertLight.push(lightAt(nx, ny, nz))
               vertAO.push(1)
               continue
             }
