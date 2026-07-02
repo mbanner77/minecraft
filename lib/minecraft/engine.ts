@@ -194,6 +194,10 @@ export class GameEngine {
     // Renderer
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' })
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    // Alle Farben stammen aus handgezeichneten Canvas-Texturen und sind als
+    // Display-Farben gemeint — keine sRGB-Konvertierung in der Pipeline,
+    // sonst rendern die Custom-Shader (ohne colorspace_fragment) zu dunkel.
+    this.renderer.outputColorSpace = THREE.LinearSRGBColorSpace
     this.scene = new THREE.Scene()
     this.camera = new THREE.PerspectiveCamera(70, 1, 0.05, 1000)
     this.resize()
@@ -204,7 +208,6 @@ export class GameEngine {
     this.atlasTexture.magFilter = THREE.NearestFilter
     this.atlasTexture.minFilter = THREE.NearestFilter
     this.atlasTexture.flipY = false
-    this.atlasTexture.colorSpace = THREE.SRGBColorSpace
 
     this.opaqueMaterial = this.makeChunkMaterial(false)
     this.waterMaterial = this.makeChunkMaterial(true)
@@ -1112,6 +1115,9 @@ export class GameEngine {
       // Fallziel suchen
       let ty = cy - 1
       while (ty > 0 && this.world.getBlockAt(x, ty, z) === 0) ty--
+      // nicht in Spieler oder Mobs hinein materialisieren — Block bleibt dann schweben
+      if (blockIntersectsBody(x, ty + 1, z, this.body)) break
+      if (this.mobs.some((m) => blockIntersectsBody(x, ty + 1, z, m.body))) break
       this.world.setBlockAt(x, cy, z, 0)
       this.world.setBlockAt(x, ty + 1, z, id)
       cy++
@@ -1389,11 +1395,12 @@ export class GameEngine {
       mz /= len
     }
 
-    // in Weltkoordinaten drehen
+    // in Weltkoordinaten drehen (Kamera-Konvention: yaw=0 blickt Richtung -Z,
+    // Vorwärts = (-sin(yaw), -cos(yaw)), Rechts = (cos(yaw), -sin(yaw)))
     const sin = Math.sin(this.yaw)
     const cos = Math.cos(this.yaw)
-    const wx = mx * cos - mz * sin
-    const wz = mx * sin + mz * cos
+    const wx = mx * cos + mz * sin
+    const wz = -mx * sin + mz * cos
 
     let speed = WALK_SPEED
     if (this.sprinting) speed = SPRINT_SPEED
@@ -1415,7 +1422,8 @@ export class GameEngine {
     } else if (b.inWater) {
       b.vy -= GRAVITY * 0.3 * dt
       b.vy = Math.max(b.vy, -4)
-      if (!inUI && this.keys.has('Space')) b.vy = Math.min(b.vy + 24 * dt, 3.5)
+      // an der Oberfläche stärkerer Schub, damit man über 1-Block-Ufer klettern kann
+      if (!inUI && this.keys.has('Space')) b.vy = Math.min(b.vy + 24 * dt, b.headInWater ? 3.5 : 6.4)
       this.fallStart = null
     } else {
       b.vy -= GRAVITY * dt
@@ -1842,7 +1850,7 @@ export class GameEngine {
       const bx = Math.floor(this.body.x)
       const by = Math.floor(this.body.y)
       const bz = Math.floor(this.body.z)
-      const dirs = ['Süden (+Z)', 'Westen (-X)', 'Norden (-Z)', 'Osten (+X)']
+      const dirs = ['Norden (-Z)', 'Westen (-X)', 'Süden (+Z)', 'Osten (+X)']
       const yawDeg = ((this.yaw * 180) / Math.PI) % 360
       const facing = dirs[Math.round((((yawDeg + 360) % 360) / 90)) % 4]
       const ticks = Math.floor(((this.timeOfDay + 0.75) % 1) * 24)

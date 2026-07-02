@@ -108,7 +108,8 @@ export function buildChunkGeometry(
         }
 
         const isWater = def.liquid
-        const target = isWater ? water : opaque
+        // Eis hat Alpha < 255 und braucht echtes Blending → Transparent-Pass
+        const target = isWater || id === Block.Ice ? water : opaque
 
         for (const face of FACES) {
           const [dx, dy, dz] = face.dir

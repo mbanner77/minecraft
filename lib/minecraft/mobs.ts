@@ -5,7 +5,7 @@ import * as THREE from 'three'
 import { World } from './world'
 import { PhysicsBody, moveBody } from './physics'
 import { GRAVITY, TERMINAL_VELOCITY } from './constants'
-import { Item } from './blocks'
+import { Item, getBlock } from './blocks'
 
 export type MobType = 'pig' | 'sheep' | 'zombie' | 'creeper'
 
@@ -242,13 +242,15 @@ export class Mob {
       b.vy = Math.max(b.vy, -TERMINAL_VELOCITY)
     }
 
-    // Hindernis voraus? → springen
+    // Solides Hindernis voraus? → springen (Gras/Blumen/Wasser sind keine Hindernisse)
     if (targetSpeed > 0 && b.onGround) {
       const aheadX = b.x + dirX * 0.7
       const aheadZ = b.z + dirZ * 0.7
-      const feet = world.getBlockAt(Math.floor(aheadX), Math.floor(b.y + 0.1), Math.floor(aheadZ))
-      const head = world.getBlockAt(Math.floor(aheadX), Math.floor(b.y + 1.1), Math.floor(aheadZ))
-      if (feet !== 0 && head === 0) b.vy = 8.5
+      const feetId = world.getBlockAt(Math.floor(aheadX), Math.floor(b.y + 0.1), Math.floor(aheadZ))
+      const headId = world.getBlockAt(Math.floor(aheadX), Math.floor(b.y + 1.1), Math.floor(aheadZ))
+      const feetSolid = feetId !== 0 && (getBlock(feetId)?.solid ?? false)
+      const headSolid = headId !== 0 && (getBlock(headId)?.solid ?? false)
+      if (feetSolid && !headSolid) b.vy = 8.5
     }
 
     moveBody(world, b, b.vx * dt, b.vy * dt, b.vz * dt)

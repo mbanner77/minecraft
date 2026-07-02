@@ -53,6 +53,12 @@ export class World {
     }
     this.chunks.set(key, chunk)
     this.initChunkLight(chunk)
+    // Nachbar-Meshes wurden ggf. gegen "Luft mit vollem Skylight" gebaut,
+    // solange dieser Chunk fehlte → neu meshen (Face-Culling + Licht an der Grenze)
+    for (const [dx, dz] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as Array<[number, number]>) {
+      const n = this.chunks.get(chunkKey(cx + dx, cz + dz))
+      if (n) n.dirty = true
+    }
     return chunk
   }
 
@@ -159,7 +165,9 @@ export class World {
     const { cx, cz } = chunk
     const heights = new Int16Array(CHUNK_SIZE * CHUNK_SIZE) // erster lichtundurchlässiger Block von oben
 
-    // 1) Skylight-Säulen von oben füllen
+    // 1) Skylight-Säulen von oben füllen — Abschwächung identisch zur BFS-Regel
+    //    in propagateLight (volles Licht fällt frei, sonst -max(1, op) pro Schritt),
+    //    sonst weicht das Licht nach einem Chunk-Reload vom Flutfüllungs-Fixpunkt ab
     for (let z = 0; z < CHUNK_SIZE; z++) {
       for (let x = 0; x < CHUNK_SIZE; x++) {
         let level = MAX_LIGHT
@@ -168,7 +176,7 @@ export class World {
           const id = chunk.get(x, y, z)
           const op = lightOpacity(id)
           if (op >= 15) break
-          level = Math.max(0, level - op)
+          if (!(level === MAX_LIGHT && op === 0)) level = Math.max(0, level - Math.max(1, op))
           chunk.setSkyLight(x, y, z, level)
           if (level === 0) break
         }
@@ -192,7 +200,16 @@ export class World {
         // Randspalten immer als Seeds (für Chunk-übergreifende Ausbreitung)
         if (x === 0 || x === CHUNK_SIZE - 1 || z === 0 || z === CHUNK_SIZE - 1) hmax = WORLD_HEIGHT - 1
 
-        for (let y = own + 1; y <= hmax; y++) {
+        // Spalten mit Teil-Abschwächern (Wasser, Blätter) brauchen auch oberhalb
+        // von hmax Seeds: bis zum ersten vollen Sonnenlicht hochlaufen
+        let first15 = own + 1
+        for (let y = own + 1; y < WORLD_HEIGHT; y++) {
+          first15 = y
+          if (chunk.getSkyLight(x, y, z) === MAX_LIGHT) break
+        }
+
+        const top = Math.max(hmax, first15)
+        for (let y = own + 1; y <= top; y++) {
           const l = chunk.getSkyLight(x, y, z)
           if (l > 1) skyQueue.push(cx * CHUNK_SIZE + x, y, cz * CHUNK_SIZE + z, l)
         }
@@ -248,6 +265,13 @@ export class World {
       const level = queue[head + 3]
       head += 4
       if (level <= 1) continue
+      // Veraltete Seeds überspringen: die Zelle kann seit dem Einreihen dunkler
+      // geworden sein (z.B. Frontier-Einträge aus removeLight, die eine spätere
+      // Entfernungs-Welle über einen anderen Pfad doch noch genullt hat)
+      if (wy < WORLD_HEIGHT) {
+        const cur = channel === 'sky' ? this.getSkyLightAt(wx, wy, wz) : this.getBlockLightAt(wx, wy, wz)
+        if (cur < level) continue
+      }
 
       for (const [dx, dy, dz] of NEIGHBORS) {
         const nx = wx + dx
@@ -341,20 +365,31 @@ export class World {
 
     const newOpacity = lightOpacity(newId)
 
-    if (newOpacity > 0) {
-      // Block wurde platziert/undurchsichtiger: vorhandenes Licht an der Stelle entfernen
-      this.removeLight(wx, wy, wz, 'sky')
-      if (newEmit === 0) this.removeLight(wx, wy, wz, 'block')
-    } else {
-      // Block wurde entfernt/durchlässig: Licht von Nachbarn hereinziehen
+    // Vorhandenes Licht an der Stelle entfernen (no-op, wenn dort schon 0 ist);
+    // bei durchlässigen Blöcken wird es direkt danach korrekt wieder aufgefüllt
+    this.removeLight(wx, wy, wz, 'sky')
+    if (newEmit === 0) this.removeLight(wx, wy, wz, 'block')
+
+    if (newOpacity < 15) {
+      // Block entfernt oder durchlässig(er) geworden: Licht von Nachbarn hereinziehen
       const skyQueue: number[] = []
       const blockQueue: number[] = []
       // Kommt von oben volles Sonnenlicht?
       if (this.getSkyLightAt(wx, wy + 1, wz) === MAX_LIGHT || wy + 1 >= WORLD_HEIGHT) {
-        this.setSkyLightAt(wx, wy, wz, MAX_LIGHT)
-        skyQueue.push(wx, wy, wz, MAX_LIGHT)
+        if (newOpacity === 0) {
+          this.setSkyLightAt(wx, wy, wz, MAX_LIGHT)
+          skyQueue.push(wx, wy, wz, MAX_LIGHT)
+        } else if (wy + 1 < WORLD_HEIGHT) {
+          skyQueue.push(wx, wy + 1, wz, MAX_LIGHT)
+        } else {
+          const level = Math.max(0, MAX_LIGHT - Math.max(1, newOpacity))
+          this.setSkyLightAt(wx, wy, wz, level)
+          if (level > 1) skyQueue.push(wx, wy, wz, level)
+        }
       }
       for (const [dx, dy, dz] of NEIGHBORS) {
+        // ungeladene Nachbarn liefern Fallback-Skylight 15 → keine Phantom-Seeds
+        if (!this.isLoadedAt(wx + dx, wz + dz)) continue
         const sl = this.getSkyLightAt(wx + dx, wy + dy, wz + dz)
         if (sl > 1) skyQueue.push(wx + dx, wy + dy, wz + dz, sl)
         const bl = this.getBlockLightAt(wx + dx, wy + dy, wz + dz)
